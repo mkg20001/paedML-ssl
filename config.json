@@ -2,6 +2,7 @@
   "addons": [
     "tools",
     "base",
-    "nginx"
+    "nginx",
+    "baseDeploy"
   ]
 }
