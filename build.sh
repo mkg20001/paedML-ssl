@@ -4,6 +4,7 @@ set -e
 
 vagrant up
 bash export.sh
+vagrant halt
 
 rm -rf dist
 mkdir dist
