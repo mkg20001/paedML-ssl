@@ -1,0 +1,19 @@
+{
+  "name": "le-standalone",
+  "version": "0.0.1",
+  "description": "Let's Encrypt Standalone proxy",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "letsencrypt",
+    "standalone",
+    "proxy"
+  ],
+  "author": "Maciej Krüger <mkg20001@gmail.com>",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "mkg-infra": "github:mkg20001/mkg-infra"
+  }
+}

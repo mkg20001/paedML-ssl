@@ -1,0 +1,31 @@
+groups:
+  some-group:
+    - some-host
+
+config:
+  dataDirectory: '/etc/enter-script-state-location-here'
+
+modules:
+  auth:
+    username:
+      keys: ['gh:githubName', 'lp:launchpadName']
+      groups: ['sudo']
+  backup:
+    type: 'borg'
+    storage:
+      sshpass: '...'
+      repo: 'sftp://...'
+    create:
+      exclude:
+        - /home/*/.cache/*
+        - /root/.cache/*
+        - /var/cache/*
+        - /var/tmp/*
+      excludeCaches: true
+      name: '{hostname}-{now}'
+    prune:
+      daily: 20
+      prefix: '{hostname}-'
+    extraArgs:
+      create: []
+      prune: []
