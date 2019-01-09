@@ -18,8 +18,8 @@ server {
   listen [::]:443 default_server ssl http2;
 
   include _/modern-ssl.conf;
-  ssl_certificate /etc/ssl/letsencrypt/MAINSITE/fullchain.cer;
-  ssl_certificate_key /etc/ssl/letsencrypt/MAINSITE/MAINSITE.key;
+  ssl_certificate /etc/ssl/letsencrypt/DOMAIN/fullchain.cer;
+  ssl_certificate_key /etc/ssl/letsencrypt/DOMAIN/DOMAIN.key;
 
   location / {
     # Redirect all HTTPS requests for unknown domains to the main site.

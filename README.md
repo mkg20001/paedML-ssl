@@ -10,7 +10,7 @@ For this you need a server with vagrant and virtualbox already installed and set
 
 Then run `bash build.sh`
 
-This should create a `dist` folder containing the `credentials` file and the VM itself, named `paedML-ssl.ovf`
+This should create a `dist` folder containing the `credentials` file and the VM itself, named `paedML-ssl.ova`
 
 # Why?
 

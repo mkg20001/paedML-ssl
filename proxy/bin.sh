@@ -17,6 +17,10 @@ $1=$2"
   fi
 }
 
+acme() {
+  /root/.acme.sh/acme.sh --config-home /etc/ssl/letsencrypt "$@"
+}
+
 help() {
   echo "Proxy Config Tool"
   echo
@@ -59,6 +63,16 @@ setup() {
   email=$(_db email)
   domain=$(_db domain)
   ip=$(_db ip)
+
+  echo "[*] Applying changes..."
+
+  cat /etc/nginx/sites/00-default.conf.tpl | sed "s|DOMAIN|$domain|g" > /etc/nginx/sites/00-default.conf
+
+  echo "[*] Reloading nginx..."
+
+  service nginx reload
+
+  echo "[!] Done"
 }
 
 status() {
