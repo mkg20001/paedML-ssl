@@ -2,8 +2,9 @@
 
 set -e
 
-MAIN=$(dirname $(readlink -f $0))
-cd "$MAIN"
+rm -rf /le-standalone
+ln -sf /vagrant /le-standalone
+cd /le-standalone
 
 echo -n "le-standalone" > /etc/hostname
 hostname le-standalone
@@ -44,3 +45,6 @@ echo "    ubuntu"
 echo "  Password:"
 echo "    $PW"
 echo "=========================="
+
+rm /le-standalone
+cp -rp /vagrant /le-standalone # this ensures that the machine continues working without the /vagrant part mounted
