@@ -1,6 +1,8 @@
 groups:
   web:
     - le-standalone
+  nginx:
+    - le-standalone
 
 config:
-  dataDirectory: '/vagrant'
+  dataDirectory: '/var/lib/le-standalone'
