@@ -8,4 +8,5 @@ account.conf
 node_modules
 package-lock.json
 # vagrant
+*.log
 .vagrant
