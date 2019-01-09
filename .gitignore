@@ -11,3 +11,5 @@ package-lock.json
 *.log
 .vagrant
 credentials
+dist
+*.ova

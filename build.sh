@@ -5,7 +5,7 @@ set -e
 vagrant up
 bash export.sh
 vagrant halt
-sleep 10s
+sleep 1m
 
 rm -rf dist
 mkdir dist
