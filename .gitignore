@@ -7,3 +7,5 @@ account.conf
 # nodeJS
 node_modules
 package-lock.json
+# vagrant
+.vagrant

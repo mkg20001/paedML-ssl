@@ -1,6 +1,7 @@
 {
   "addons": [
     "tools",
-    "base"
+    "base",
+    "nginx"
   ]
 }
