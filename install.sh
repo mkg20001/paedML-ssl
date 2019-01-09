@@ -34,7 +34,13 @@ PW=$(curl -s 'https://xkpasswd.net/s/index.cgi' -H 'Content-Type: application/x-
 
 echo "ubuntu:$PW" | chpasswd
 
+echo "$PW" > /home/ubuntu/.pw
+
+echo -e "Credentials:\n\tUser:\n\t\tubuntu\n\tPassword:\n\t\t$PW" > /vagrant/credentials
+
 echo "====[ SETUP COMPLETE ]===="
-echo "Generated Password:"
-echo "$PW"
+echo "  User:"
+echo "    ubuntu"
+echo "  Password:"
+echo "    $PW"
 echo "=========================="
