@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DB="/var/lib/proxy-config"
+MAIN=$(dirname $(readlink -f $0))
 
 if [ $(id -u) -gt 0 ]; then
   echo "ERROR: Must be run as root" >&2
@@ -83,7 +84,7 @@ get_domains() {
 
 regen_nginx_config() {
   echo "[*] Anwenden der Änderungen..."
-  cat /etc/nginx/sites/00-default.conf.tpl | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
+  cat "$MAIN/00-default.conf" | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
 }
 
 reload_nginx() {
