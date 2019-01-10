@@ -22,13 +22,14 @@ acme() {
 }
 
 help() {
-  echo "Proxy Config Tool"
+  echo "Proxy Konfigurations Tool"
   echo
-  echo "Commands:"
-  echo " setup: Do initial configuration (can be run again to change values)"
+  echo "Befehler:"
+  echo " setup: Initielle konfiguration durchführen (kann auch erneut ausgeführt werden um die Werte zu ändern)"
   echo " status: Nginx status"
-  echo " cron: Execute cronjob manually"
-  echo " help: This help"
+  echo " cron: Cronjob manuell ausführen"
+  echo " logs: Nginx Logdateien"
+  echo " help: Diese hilfe"
   echo
   exit 2
 }
@@ -41,7 +42,7 @@ prompt() {
 
   while [ -z "$NEW" ]; do
     if [ ! -z "$CUR" ]; then
-      read -p "> $PROMPT (current value '$CUR', leave empty to keep): " NEW
+      read -p "> $PROMPT (aktueller wert '$CUR', leer lassen um beizubehalten): " NEW
       if [ -z "$NEW" ]; then
         NEW="$CUR"
       fi
@@ -56,23 +57,28 @@ prompt() {
 }
 
 setup() {
-  prompt email "E-Mail for notifications"
-  prompt domain "Main Domain-Name"
+  if [ -z "$(_db sub)" ]; then
+    _db sub "mail vibe"
+  fi
+
+  prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
+  prompt domain "Haupt Domain-Name"
   prompt ip "Server IP"
+  prompt sub "Subdomains (leerzeichen getrennt angeben)"
 
   email=$(_db email)
   domain=$(_db domain)
   ip=$(_db ip)
 
-  echo "[*] Applying changes..."
+  echo "[*] Anwenden der Änderungen..."
 
   cat /etc/nginx/sites/00-default.conf.tpl | sed "s|DOMAIN|$domain|g" > /etc/nginx/sites/00-default.conf
 
-  echo "[*] Reloading nginx..."
+  echo "[*] Neuladen von nginx..."
 
   service nginx reload
 
-  echo "[!] Done"
+  echo "[!] Fertig"
 }
 
 status() {
