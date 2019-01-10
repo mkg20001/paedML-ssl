@@ -52,6 +52,7 @@ echo "  Password:"
 echo "    $PW"
 echo "=========================="
 
+cd /
 while ! umount /le-standalone; do
   sleep 1s
 done
