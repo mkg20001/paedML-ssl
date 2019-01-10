@@ -86,6 +86,16 @@ regen_nginx_config() {
   cat /etc/nginx/sites/00-default.conf.tpl | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
 }
 
+reload_nginx() {
+  if sudo service nginx status 2>/dev/null >/dev/null; then
+    echo "[*] Neuladen von nginx..."
+    service nginx reload
+  else
+    echo "[*] Neustarten von nginx..."
+    service nginx restart
+  fi
+}
+
 setup() {
   if [ -z "$(_db sub)" ]; then
     _db sub "mail vibe"
@@ -107,17 +117,14 @@ setup() {
     regen_nginx_config
   fi
 
-  echo "[*] Neuladen von nginx..."
-  service nginx reload
+  reload_nginx
 
   echo "[*] Holen des Zertifikates..."
   acme_add "${domains_cert[@]}"
 
   if [ ! -e /etc/nginx/sites/00-default.conf ]; then
     regen_nginx_config#
-
-    echo "[*] Neuladen von nginx..."
-    service nginx reload
+    reload_nginx
   fi
 
   echo "[!] Fertig"
