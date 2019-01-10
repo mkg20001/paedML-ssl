@@ -22,9 +22,11 @@ server {
   ssl_certificate_key /etc/ssl/letsencrypt/DOMAIN/DOMAIN.key;
 
   location / {
-    # Redirect all HTTPS requests for unknown domains to the main site.
-    return 302 https://MAINSITE;
+    # Pass requests to paedML server
+    proxy_pass       http://SERVER_IP$request_uri;
+    proxy_set_header Host            $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
   }
 
-  include _/letsencrypt.conf;
+  include _/letsencrypt.conf; # catch /.well_known/letsencrypt
 }
