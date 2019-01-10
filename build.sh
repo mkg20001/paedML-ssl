@@ -9,5 +9,5 @@ rm -rf dist
 mkdir dist
 mv credentials dist
 
-sleep 1m
+sleep 10s
 bash export.sh
