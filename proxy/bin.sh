@@ -136,7 +136,7 @@ status() {
 }
 
 cron() {
-  :
+  acme --cron --home "/root/.acme.sh" 
 }
 
 main() {
