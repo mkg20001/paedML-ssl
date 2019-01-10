@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DB="/var/lib/proxy-config"
-MAIN=$(dirname $(readlink -f $0))
+MAIN=$(dirname $(dirname $(readlink -f $0)))
 
 if [ $(id -u) -gt 0 ]; then
   echo "ERROR: Must be run as root" >&2
@@ -136,7 +136,7 @@ status() {
 }
 
 cron() {
-  acme --cron --home "/root/.acme.sh" 
+  acme --cron --home "/root/.acme.sh"
 }
 
 main() {

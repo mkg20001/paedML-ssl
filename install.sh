@@ -28,9 +28,7 @@ if ! which node 2> /dev/null > /dev/null; then
   apt-get install nodejs -y
 fi
 
-npm i
-
-./node_modules/.bin/dpl-tool deploy.yaml | bash -
+bash update.sh
 
 # yes
 PW=$(curl -s 'https://xkpasswd.net/s/index.cgi' -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data 'a=genpw&n=1&c=%7B%22num_words%22%3A2%2C%22word_length_min%22%3A4%2C%22word_length_max%22%3A8%2C%22case_transform%22%3A%22LOWER%22%2C%22separator_character%22%3A%22-%22%2C%22padding_digits_before%22%3A0%2C%22padding_digits_after%22%3A0%2C%22padding_type%22%3A%22NONE%22%2C%22random_increment%22%3A%22AUTO%22%7D' | jq -r .passwords[0])
@@ -41,9 +39,8 @@ localectl set-keymap de
 
 echo "$PW" > /home/vagrant/.pw
 
-echo -e "Zugangsdaten:\n\Benutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'proxy-config' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
+echo -e "Zugangsdaten:\n\Benutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'sudo proxy-config setup' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
 unix2dos /vagrant/credentials
-echo -e "Letsencrypt für paedML - Entwickelt von Maciej Krüger\n\nVerwaltung:\n\tproxy-config - Nginx Proxy konfigurieren\n\t...\n" > /etc/motd
 
 echo "====[ SETUP COMPLETE ]===="
 echo "  User:"
