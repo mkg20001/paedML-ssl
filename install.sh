@@ -52,6 +52,8 @@ echo "  Password:"
 echo "    $PW"
 echo "=========================="
 
-umount /le-standalone
+while ! umount /le-standalone; do
+  sleep 1s
+done
 rmdir /le-standalone
 cp -rp /vagrant /le-standalone # this ensures that the machine continues working without the /vagrant part mounted
