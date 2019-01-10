@@ -1,0 +1,5 @@
+affects:
+  - '*'
+modules:
+  pkg:
+    - dos2unix
