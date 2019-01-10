@@ -39,7 +39,9 @@ localectl set-keymap de
 
 echo "$PW" > /home/vagrant/.pw
 
-echo -e "Credentials:\n\tUser:\n\t\tvagrant\n\tPassword:\n\t\t$PW" > /vagrant/credentials
+echo -e "Zugangsdaten:\n\Benutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'proxy-config' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
+unix2dos /vagrant/credentials
+echo -e "Letsencrypt für paedML - Entwickelt von Maciej Krüger\n\nVerwaltung:\n\tproxy-config - Nginx Proxy konfigurieren\n\t...\n" > /etc/motd
 
 echo "====[ SETUP COMPLETE ]===="
 echo "  User:"

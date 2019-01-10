@@ -2,6 +2,11 @@
 
 DB="/var/lib/proxy-config"
 
+if [ $(id -u) -gt 0 ]; then
+  echo "ERROR: Must be run as root" >&2
+  exit 2
+fi
+
 if [ ! -e "$DB" ]; then
   touch "$DB"
 fi
@@ -21,6 +26,16 @@ acme() {
   /root/.acme.sh/acme.sh --config-home /etc/ssl/letsencrypt "$@"
 }
 
+acme_add() {
+  domains=()
+  while [ ! -z "$1" ]; do
+    domains+=("-d" "$1")
+    shift
+  done
+
+  acme --reloadcmd "service nginx reload" --issue -w /tmp/ "${domains[@]}"
+}
+
 help() {
   echo "Proxy Konfigurations Tool"
   echo
@@ -29,7 +44,7 @@ help() {
   echo " status: Nginx status"
   echo " cron: Cronjob manuell ausführen"
   echo " logs: Nginx Logdateien"
-  echo " help: Diese hilfe"
+  echo " help: Diese Hilfe"
   echo
   exit 2
 }
@@ -56,33 +71,60 @@ prompt() {
   _db "$KEY" "$NEW"
 }
 
+get_domains() {
+  domain=$(_db domain)
+  sub=$(_db sub)
+  domains_cert=("$domain")
+
+  for s in $sub; do
+    domains_cert+=("$s.$domain")
+  done
+}
+
+regen_nginx_config() {
+  echo "[*] Anwenden der Änderungen..."
+  cat /etc/nginx/sites/00-default.conf.tpl | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
+}
+
 setup() {
   if [ -z "$(_db sub)" ]; then
     _db sub "mail vibe"
   fi
 
-  prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
+  # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
   prompt domain "Haupt Domain-Name"
   prompt ip "Server IP"
   prompt sub "Subdomains (leerzeichen getrennt angeben)"
 
-  email=$(_db email)
-  domain=$(_db domain)
+  # email=$(_db email)
   ip=$(_db ip)
+  get_domains
 
-  echo "[*] Anwenden der Änderungen..."
-
-  cat /etc/nginx/sites/00-default.conf.tpl | sed "s|DOMAIN|$domain|g" > /etc/nginx/sites/00-default.conf
+  if [ ! -e "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
+    echo "[*] Seite in wartungsmodus schalten..."
+    rm -f /etc/nginx/sites/00-default.conf
+  else
+    regen_nginx_config
+  fi
 
   echo "[*] Neuladen von nginx..."
-
   service nginx reload
+
+  echo "[*] Holen des Zertifikates..."
+  acme_add "${domains_cert[@]}"
+
+  if [ ! -e /etc/nginx/sites/00-default.conf ]; then
+    regen_nginx_config#
+
+    echo "[*] Neuladen von nginx..."
+    service nginx reload
+  fi
 
   echo "[!] Fertig"
 }
 
 status() {
-  sudo systemctl status nginx
+  systemctl status nginx
 }
 
 cron() {
