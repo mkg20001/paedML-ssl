@@ -6,6 +6,8 @@ vagrant up
 bash export.sh
 vagrant halt
 sleep 1m
+vagrant halt
+sleep 1m
 
 rm -rf dist
 mkdir dist
