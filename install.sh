@@ -2,8 +2,10 @@
 
 set -e
 
+umount /le-standalone || /bin/true
 rm -rf /le-standalone
-ln -sf /vagrant /le-standalone
+mkdir /le-standalone
+mount --bind /vagrant /le-standalone
 cd /le-standalone
 
 echo -n "le-standalone" > /etc/hostname
@@ -50,5 +52,6 @@ echo "  Password:"
 echo "    $PW"
 echo "=========================="
 
-rm /le-standalone
+umount /le-standalone
+rmdir /le-standalone
 cp -rp /vagrant /le-standalone # this ensures that the machine continues working without the /vagrant part mounted
