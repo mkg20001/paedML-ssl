@@ -22,4 +22,6 @@ VBoxManage export "$ID" -o dist/paedML-ssl.ovf \
   --description "paedML SSL"
 
 mv dist/paedML-ssl.ovf dist/paedML-ssl-vbox.ovf
-cat dist/paedML-ssl-vbox.ovf | sed "s|<vssd:VirtualSystemType>virtualbox-2.2</vssd:VirtualSystemType>|<vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>|g" | sed "s|$XML_SOUNDCARD||g" > dist/paedML-ssl-vmware.ovf
+VMWARE=$(cat dist/paedML-ssl-vbox.ovf | sed "s|<vssd:VirtualSystemType>virtualbox-2.2</vssd:VirtualSystemType>|<vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>|g")
+VMWARE=${VMWARE/"$XML_SOUNDCARD"/""}
+echo "$VMWARE" > dist/paedML-ssl-vmware.ovf
