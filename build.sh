@@ -3,12 +3,11 @@
 set -e
 
 vagrant up
-bash export.sh
 vagrant halt
-sleep 1m
-vagrant halt
-sleep 1m
 
 rm -rf dist
 mkdir dist
-mv paedML-ssl.ova credentials dist
+mv credentials dist
+
+sleep 1m
+bash export.sh
