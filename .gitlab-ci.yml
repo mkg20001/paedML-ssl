@@ -3,7 +3,7 @@ build:
   script:
     - ln -sf /cache $HOME/.vagrant.d
     - vagrant box update || /bin/true
-    - bash build.sh
+    - LC_ALL=C bash build.sh
   artifacts:
     paths:
       - paedML-ssl.tar.lzma
