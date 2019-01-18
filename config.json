@@ -3,6 +3,7 @@
     "tools",
     "base",
     "nginx",
-    "baseDeploy"
+    "baseDeploy",
+    "security"
   ]
 }
