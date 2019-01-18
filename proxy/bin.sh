@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -e
+
 DB="/var/lib/proxy-config"
 MAIN=$(dirname $(dirname $(readlink -f $0)))
 
 if [ $(id -u) -gt 0 ]; then
-  echo "ERROR: Must be run as root" >&2
+  echo "FEHLER: Dieser Befehl muss also Benutzer root ausgeführt werden. Verwenden Sie bitte stattdessen 'sudo $0 $*'" >&2
   exit 2
 fi
 
@@ -112,7 +114,7 @@ setup() {
   get_domains
 
   if [ ! -e "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
-    echo "[*] Seite in wartungsmodus schalten..."
+    echo "[*] Seite wird in Wartungsmodus geschaltet..."
     rm -f /etc/nginx/sites/00-default.conf
   else
     regen_nginx_config
@@ -123,6 +125,12 @@ setup() {
   echo "[*] Holen des Zertifikates..."
   acme_add "${domains_cert[@]}"
 
+  new_hostname="paedml-ssl.$domain"
+  echo "[*] Ändern des Server-Hostnamens zu '$new_hostname'..."
+  echo "$new_hostname" > /etc/hostname
+  hostname "$new_hostname"
+
+  echo "[*] Ändern der Webserver-Konfiguration..."
   if [ ! -e /etc/nginx/sites/00-default.conf ]; then
     regen_nginx_config#
     reload_nginx

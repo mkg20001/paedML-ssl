@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 MAIN=$(dirname $(dirname $(readlink -f $0)))
 
 apt update

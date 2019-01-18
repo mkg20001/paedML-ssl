@@ -8,8 +8,8 @@ mkdir /le-standalone
 mount --bind /vagrant /le-standalone
 cd /le-standalone
 
-echo -n "le-standalone" > /etc/hostname
-hostname le-standalone
+echo -n "paedml-ssl" > /etc/hostname
+hostname paedml-ssl
 
 # because npm
 export SUDO_GID=
@@ -39,7 +39,7 @@ localectl set-keymap de
 
 echo "$PW" > /home/vagrant/.pw
 
-echo -e "Zugangsdaten:\n\Benutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'sudo proxy-config setup' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
+echo -e "Zugangsdaten:\n\tBenutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'sudo proxy-config setup' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
 unix2dos /vagrant/credentials
 
 echo "====[ SETUP COMPLETE ]===="
