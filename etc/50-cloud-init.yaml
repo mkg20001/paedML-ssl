@@ -1,0 +1,13 @@
+# paedML SSL Network config
+# Maps first "ethernet-like" network to eth0 and enables dhcp
+network:
+  version: 2
+  ethernets:
+    eth0:
+      match:
+        name: e*
+      set-name: eth0
+      dhcp4: true
+      dhcp6: true
+      wakeonlan: true
+
