@@ -11,4 +11,4 @@ mv credentials dist
 
 sleep 10s
 bash export.sh
-tar cvf paedML-ssl.tar.lzma --lzma dist
+tar cvf paedML-ssl.tar.xz --lzma dist
