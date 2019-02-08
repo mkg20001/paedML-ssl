@@ -58,6 +58,10 @@ prompt() {
   CUR=$(_db "$KEY")
   NEW=""
 
+  if [ -z "$CUR" ] && [ ! -z "$3" ]; then
+    CUR="$3" # use $3 as default
+  fi
+
   while [ -z "$NEW" ]; do
     if [ ! -z "$CUR" ]; then
       read -p "> $PROMPT (aktueller wert '$CUR', leer lassen um beizubehalten): " NEW
@@ -110,27 +114,51 @@ verify_reachability() {
   fi
 }
 
-setup() {
-  if [ -z "$(_db sub)" ]; then
-    _db sub "mail vibe"
+ask_net() {
+  fam_name="IPv$1"
+  fam_id="ipv$1"
+  prompt "$fam_id" "Adresse für $fam_name (* angeben um DHCP zu verwenden, - angeben um zu deaktivieren, format: 'ADDRESSE/MASKE')"
+  if [ "$(_db $fam_id)" == "*" ]; then
+    echo "[*] Aktivieren von DHCP für $fam_name..."
+    nmcli con mod "Wired connection 1" \
+      "$fam_id.addresses" "" \
+      "$fam_id.gateway" "" \
+      "$fam_id.dns" "" \
+      "$fam_id.dns-search" "" \
+      "$fam_id.method" "auto"
+  elif [ "$(_db $fam_id)" == "-" ]; then
+    echo "[*] Deaktivieren von $fam_name"
+    nmcli con mod "Wired connection 1" \
+      "$fam_id.addresses" "" \
+      "$fam_id.gateway" "" \
+      "$fam_id.dns" "" \
+      "$fam_id.dns-search" "" \
+      "$fam_id.method" "disable"
+  else
+    prompt "$fam_id.gateway" "Gateway für $fam_name"
+    prompt "$fam_id.dns" "DNS für $fam_name"
+    prompt "$fam_id.dns-search" "DNS Domain für $fam_name"
+    nmcli con mod "Wired connection 1" \
+      "$fam_id.addresses" "$(_db $fam_id)" \
+      "$fam_id.gateway" "$(_db $fam_id.gateway)" \
+      "$fam_id.dns" "$(_db $fam_id.dns)" \
+      "$fam_id.dns-search" "$(_db $fam_id.dns-search)" \
+      "$fam_id.method" "manual"
   fi
+}
+
+setup() {
+  ask_net 4
+  ask_net 6
 
   # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
-  prompt net4 "Addresse für IPv4 (* angeben um DHCP zu verwenden)"
-  prompt net6 "Addresse für IPv6 (* angeben um DHCP zu verwenden)"
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
   prompt ip "paedML Ziel-Server IP"
-  prompt sub "Subdomains (mit leerzeichen getrennt angeben)"
-
-  setup_net
+  prompt sub "Subdomains (mit leerzeichen getrennt angeben)" "mail vibe"
 
   setup_web
 
   echo "[!] Fertig"
-}
-
-setup_net() {
-  echo "[!] Netzwerkkonfiguration unfertig!"
 }
 
 setup_web() {
