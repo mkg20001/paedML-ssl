@@ -104,6 +104,7 @@ verify_reachability() {
   echo "$TOKEN" > /tmp/verify-token
   OUT=$(curl -s --header "Host: verify.internal" "$1/token")
   if [ "$OUT" != "$TOKEN" ]; then
+    # TODO: better error handling, show better errors
     echo "[!] Addresse $1 ist nicht erreichbar oder verweist nicht auf den paedML SSL Server!" 2>&1
     exit 2
   fi
@@ -150,11 +151,18 @@ setup_web() {
   while $checkLoop; do
     echo "[*] Überprüfen ob der Server erreichbar ist..."
     for domain in "${domains_cert[@]}"; do
+      # TODO: catch error
       verify_reachability "$domain"
     done
-  done
 
-  exit 0
+    # TODO: check if success
+    if false; then
+      echo "[!] Server nicht erreichbar! Bitte überprüfen Sie die Konfiguration und wiederholen Sie den test durch das Drücken der Eingabetaste."
+      read nothing
+    else
+      checkLoop=false
+    fi
+  done
 
   echo "[*] Holen des Zertifikates..."
   acme_add "${domains_cert[@]}"
