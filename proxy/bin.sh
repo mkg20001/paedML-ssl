@@ -6,7 +6,7 @@ DB="/var/lib/proxy-config"
 MAIN=$(dirname $(dirname $(readlink -f $0)))
 
 if [ $(id -u) -gt 0 ]; then
-  echo "FEHLER: Dieser Befehl muss also Benutzer root ausgeführt werden. Verwenden Sie bitte stattdessen 'sudo $0 $*'" >&2
+  echo "FEHLER: Dieser Befehl muss als Benutzer root ausgeführt werden. Verwenden Sie bitte stattdessen 'sudo $0 $*'" >&2
   exit 2
 fi
 
@@ -42,8 +42,8 @@ acme_add() {
 help() {
   echo "Proxy Konfigurations Tool"
   echo
-  echo "Befehler:"
-  echo " setup: Initielle konfiguration durchführen (kann auch erneut ausgeführt werden um die Werte zu ändern)"
+  echo "Befehle:"
+  echo " setup: Initielle Konfiguration durchführen (kann auch erneut ausgeführt werden um die Werte zu ändern)"
   echo " status: Nginx status"
   echo " cron: Cronjob manuell ausführen"
   echo " logs: Nginx Logdateien"
@@ -99,16 +99,40 @@ reload_nginx() {
   fi
 }
 
+verify_reachability() {
+  TOKEN=$RANDOM
+  echo "$TOKEN" > /tmp/verify-token
+  OUT=$(curl -s --header "Host: verify.internal" "$1/token")
+  if [ "$OUT" != "$TOKEN" ]; then
+    echo "[!] Addresse $1 ist nicht erreichbar oder verweist nicht auf den paedML SSL Server!" 2>&1
+    exit 2
+  fi
+}
+
 setup() {
   if [ -z "$(_db sub)" ]; then
     _db sub "mail vibe"
   fi
 
   # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
-  prompt domain "Haupt Domain-Name"
-  prompt ip "Server IP"
+  prompt net4 "Addresse für IPv4 (* angeben um DHCP zu verwenden)"
+  prompt net6 "Addresse für IPv6 (* angeben um DHCP zu verwenden)"
+  prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
+  prompt ip "paedML Ziel-Server IP"
   prompt sub "Subdomains (leerzeichen getrennt angeben)"
 
+  setup_net
+
+  setup_web
+
+  echo "[!] Fertig"
+}
+
+setup_net() {
+  echo "[!] Netzwerkkonfiguration unfertig!"
+}
+
+setup_web() {
   # email=$(_db email)
   ip=$(_db ip)
   get_domains
@@ -122,6 +146,16 @@ setup() {
 
   reload_nginx
 
+  checkLoop=true
+  while $checkLoop; do
+    echo "[*] Überprüfen ob der Server erreichbar ist..."
+    for domain in "${domains_cert[@]}"; do
+      verify_reachability "$domain"
+    done
+  done
+
+  exit 0
+
   echo "[*] Holen des Zertifikates..."
   acme_add "${domains_cert[@]}"
 
@@ -132,11 +166,9 @@ setup() {
 
   echo "[*] Ändern der Webserver-Konfiguration..."
   if [ ! -e /etc/nginx/sites/00-default.conf ]; then
-    regen_nginx_config#
+    regen_nginx_config
     reload_nginx
   fi
-
-  echo "[!] Fertig"
 }
 
 status() {
