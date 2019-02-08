@@ -13,3 +13,6 @@ package-lock.json
 credentials
 dist
 *.ova
+# build output
+generated_deployment.sh
+paedML-ssl.tar.xz
