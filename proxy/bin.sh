@@ -120,7 +120,7 @@ setup() {
   prompt net6 "Addresse für IPv6 (* angeben um DHCP zu verwenden)"
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
   prompt ip "paedML Ziel-Server IP"
-  prompt sub "Subdomains (leerzeichen getrennt angeben)"
+  prompt sub "Subdomains (mit leerzeichen getrennt angeben)"
 
   setup_net
 
@@ -180,7 +180,17 @@ setup_web() {
 }
 
 status() {
-  systemctl status nginx
+  echo
+  echo "[+] NGinx Status und Logeinträge:"
+  echo
+  systemctl status nginx -n10 --no-pager --full
+  echo
+  echo "[+] acme.sh Status und Zertifikate:"
+  echo
+  acme --list
+  echo
+  echo "[+] Um die Konfiguration zu verändern, benutzen Sie bitte 'sudo proxy-config setup'"
+  echo
 }
 
 cron() {
