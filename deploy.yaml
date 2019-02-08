@@ -1,8 +1,9 @@
 groups:
   web:
-    - le-standalone
+    - paedml-ssl
   nginx:
-    - le-standalone
+    - paedml-ssl
+  nonode: []
 
 config:
-  dataDirectory: '/var/lib/le-standalone'
+  dataDirectory: '/var/lib/paedml-ssl'

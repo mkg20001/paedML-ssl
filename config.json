@@ -4,6 +4,7 @@
     "base",
     "nginx",
     "baseDeploy",
-    "security"
+    "security",
+    "node"
   ]
 }

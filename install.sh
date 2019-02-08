@@ -2,56 +2,42 @@
 
 set -e
 
-umount /le-standalone || /bin/true
-rm -rf /le-standalone
-mkdir /le-standalone
-mount --bind /vagrant /le-standalone
-cd /le-standalone
+# setup local repo and bind-mount
+umount /usr/lib/paedml-ssl || /bin/true
+rm -rf /usr/lib/paedml-ssl
+mkdir /usr/lib/paedml-ssl
+mount --bind /vagrant /usr/lib/paedml-ssl
+cd /usr/lib/paedml-ssl
 
+# setup hostname
 echo -n "paedml-ssl" > /etc/hostname
 hostname paedml-ssl
 
-# because npm
-export SUDO_GID=
-export SUDO_COMMAND=
-export SUDO_USER=
-export SUDO_UID=
-export HOME=/root
+# run generated deployment
+bash generated_deployment.sh
 
-if ! which node 2> /dev/null > /dev/null; then
-  wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-  VERSION=node_10.x
-  DISTRO="$(lsb_release -s -c)"
-  echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | tee /etc/apt/sources.list.d/nodesource.list
-  echo "deb-src https://deb.nodesource.com/$VERSION $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list
-  apt-get update
-  apt-get install nodejs -y
-fi
-
+# run update routine
 bash update.sh
 
-# yes
+# yes, really. but you should change the password anyways so this *shouldn't* really bother anyone
 PW=$(curl -s 'https://xkpasswd.net/s/index.cgi' -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data 'a=genpw&n=1&c=%7B%22num_words%22%3A2%2C%22word_length_min%22%3A4%2C%22word_length_max%22%3A8%2C%22case_transform%22%3A%22LOWER%22%2C%22separator_character%22%3A%22-%22%2C%22padding_digits_before%22%3A0%2C%22padding_digits_after%22%3A0%2C%22padding_type%22%3A%22NONE%22%2C%22random_increment%22%3A%22AUTO%22%7D' | jq -r .passwords[0])
-
 echo "vagrant:$PW" | chpasswd
-loadkeys de
-localectl set-keymap de
-
+# and then drop the credentials somewhere
 echo "$PW" > /home/vagrant/.pw
-
 echo -e "Zugangsdaten:\n\tBenutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'sudo proxy-config setup' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
 unix2dos /vagrant/credentials
 
-echo "====[ SETUP COMPLETE ]===="
-echo "  User:"
-echo "    vagrant"
-echo "  Password:"
-echo "    $PW"
-echo "=========================="
+# because our target audience is pretty specific let's just setup the only keyboard layout that's ever going to be used
+loadkeys de
+localectl set-keymap de
 
+# umount the bind mount
 cd /
-while ! umount /le-standalone; do
+while ! umount /usr/lib/paedml-ssl; do
   sleep 1s
 done
-rmdir /le-standalone
-cp -rp /vagrant /le-standalone # this ensures that the machine continues working without the /vagrant part mounted
+rmdir /usr/lib/paedml-ssl
+
+# this ensures that the machine continues working without the /vagrant part mounted. we'll just do a clean git clone and copy the remote to ensure no garbage gets accidentely included
+git clone /vagrant/.git /usr/lib/paedml-ssl
+git -C /usr/lib/paedml-ssl remote set-url origin "$(git -C /vagrant remote get-url origin)"
