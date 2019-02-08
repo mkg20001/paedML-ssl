@@ -16,9 +16,6 @@ hostname paedml-ssl
 # run generated deployment
 bash generated_deployment.sh
 
-# run update routine
-bash update.sh
-
 # yes, really. but you should change the password anyways so this *shouldn't* really bother anyone
 PW=$(curl -s 'https://xkpasswd.net/s/index.cgi' -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' --data 'a=genpw&n=1&c=%7B%22num_words%22%3A2%2C%22word_length_min%22%3A4%2C%22word_length_max%22%3A8%2C%22case_transform%22%3A%22LOWER%22%2C%22separator_character%22%3A%22-%22%2C%22padding_digits_before%22%3A0%2C%22padding_digits_after%22%3A0%2C%22padding_type%22%3A%22NONE%22%2C%22random_increment%22%3A%22AUTO%22%7D' | jq -r .passwords[0])
 echo "vagrant:$PW" | chpasswd
@@ -40,4 +37,9 @@ rmdir /usr/lib/paedml-ssl
 
 # this ensures that the machine continues working without the /vagrant part mounted. we'll just do a clean git clone and copy the remote to ensure no garbage gets accidentely included
 git clone /vagrant/.git /usr/lib/paedml-ssl
-git -C /usr/lib/paedml-ssl remote set-url origin "$(git -C /vagrant remote get-url origin)"
+#git -C /usr/lib/paedml-ssl remote set-url origin "$(git -C /vagrant remote get-url origin)"
+git -C /usr/lib/paedml-ssl remote set-url origin https://github.com/mkg20001/paedML-SSL.git
+
+# run update routine
+cd /usr/lib/paedml-ssl
+bash update.sh
