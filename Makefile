@@ -1,4 +1,4 @@
-build: export provision
+build: provision export
 export:
 	bash scripts/export.sh
 provision:

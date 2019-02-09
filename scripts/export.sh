@@ -2,6 +2,8 @@
 
 set -e
 
+vagrant halt
+
 rm -rf dist
 mkdir dist
 mv credentials dist
