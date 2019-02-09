@@ -11,4 +11,4 @@ apt dist-upgrade -y
 
 cd "$MAIN"
 git pull
-bash update.sh
+bash scripts/update.sh

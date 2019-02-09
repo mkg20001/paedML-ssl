@@ -42,4 +42,4 @@ git -C /usr/lib/paedml-ssl remote set-url origin https://github.com/mkg20001/pae
 
 # run update routine
 cd /usr/lib/paedml-ssl
-bash update.sh
+bash scripts/update.sh

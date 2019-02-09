@@ -2,6 +2,12 @@
 
 set -e
 
+rm -rf dist
+mkdir dist
+mv credentials dist
+
+sleep 10s
+
 ID=$(cat .vagrant/machines/default/virtualbox/id)
 
 XML_SOUNDCARD="      <Item>
@@ -25,3 +31,5 @@ mv dist/paedML-ssl.ovf dist/paedML-ssl-vbox.ovf
 VMWARE=$(cat dist/paedML-ssl-vbox.ovf | sed "s|<vssd:VirtualSystemType>virtualbox-2.2</vssd:VirtualSystemType>|<vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>|g")
 VMWARE=${VMWARE/"$XML_SOUNDCARD"/""}
 echo "$VMWARE" > dist/paedML-ssl-vmware.ovf
+
+tar cvf paedML-ssl.tar.xz --lzma dist

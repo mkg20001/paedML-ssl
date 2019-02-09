@@ -106,11 +106,14 @@ reload_nginx() {
 verify_reachability() {
   TOKEN=$RANDOM
   echo "$TOKEN" > /tmp/verify-token
+  echo -n "[*] Verbinde mit $1... "
   OUT=$(curl -s --header "Host: verify.internal" "$1/token")
   if [ "$OUT" != "$TOKEN" ]; then
     # TODO: better error handling, show better errors
     echo "[!] Addresse $1 ist nicht erreichbar oder verweist nicht auf den paedML SSL Server!" 2>&1
     exit 2
+  else
+    echo "[*] Erreichbar!"
   fi
 }
 
