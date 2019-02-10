@@ -163,7 +163,7 @@ setup() {
 
   # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
-  prompt ip "paedML Ziel-Server IP"
+  prompt ip "paedML Ziel-Server IP-Addresse oder DNS (IPv6 Addressen umklammert angeben)"
   prompt sub "Subdomains (mit leerzeichen getrennt angeben)" "mail vibe"
 
   setup_web
