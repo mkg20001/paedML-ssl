@@ -198,7 +198,7 @@ setup_web() {
     done
 
     if $checkLoop; then
-      echo "[!] Server nicht erreichbar! Bitte überprüfen Sie die Konfiguration und wiederholen Sie den test durch das Drücken der Eingabetaste."
+      echo "[!] Server nicht erreichbar! Bitte überprüfen Sie die Konfiguration und wiederholen Sie den Test durch das Drücken der Eingabetaste."
       read nothing
     fi
   done
