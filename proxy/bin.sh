@@ -113,14 +113,14 @@ reload_nginx() {
 verify_reachability() {
   TOKEN=$RANDOM
   echo "$TOKEN" > /tmp/verify-token
-  echo -n "[*] Verbinde mit $1... "
-  OUT=$(curl -s --header "Host: verify.internal" "$1/token")
+  echo "[*] Verbinde mit $1..."
+  OUT=$(curl -s --show-error --header "Host: verify.internal" "$1/token" || /bin/true)
   if [ "$OUT" != "$TOKEN" ]; then
-    # TODO: better error handling, show better errors
-    echo "[!] Addresse $1 ist nicht erreichbar oder verweist nicht auf den paedML SSL Server!" 2>&1
-    exit 2
+    echo "[!] Addresse $1 ist nicht erreichbar oder verweist nicht auf den paedML SSL Server! (Fehler siehe oben)" 2>&1
+    return 2
   else
     echo "[*] Erreichbar!"
+    return 0
   fi
 }
 
@@ -188,17 +188,18 @@ setup_web() {
   checkLoop=true
   while $checkLoop; do
     echo "[*] Überprüfen ob der Server erreichbar ist..."
+    checkLoop=false
     for domain in "${domains_cert[@]}"; do
-      # TODO: catch error
-      verify_reachability "$domain"
+      ex=0
+      verify_reachability "$domain" || ex=$?
+      if [ $ex -ne 0 ]; then
+        checkLoop=true
+      fi
     done
 
-    # TODO: check if success
-    if false; then
+    if $checkLoop; then
       echo "[!] Server nicht erreichbar! Bitte überprüfen Sie die Konfiguration und wiederholen Sie den test durch das Drücken der Eingabetaste."
       read nothing
-    else
-      checkLoop=false
     fi
   done
 
