@@ -82,15 +82,22 @@ get_domains() {
   domain=$(_db domain)
   sub=$(_db sub)
   domains_cert=("$domain")
+  cert_alt=""
 
   for s in $sub; do
     domains_cert+=("$s.$domain")
+    if [ -z "$cert_alt" ]; then
+      cert_alt="$s.$domain"
+    else
+      cert_alt="$cert_alt,$s.$domain"
+    fi
   done
 }
 
 regen_nginx_config() {
   echo "[*] Anwenden der Änderungen..."
-  cat "$MAIN/00-default.conf" | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
+  domain="${domains_cert[0]}"
+  cat "$MAIN/proxy/00-default.conf" | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
 }
 
 reload_nginx() {
@@ -195,19 +202,27 @@ setup_web() {
     fi
   done
 
-  echo "[*] Holen des Zertifikates..."
-  acme_add "${domains_cert[@]}"
+  main="${domains_cert[0]}"
+  if [ ! -e "/etc/ssl/letsencrypt/$main/$main.conf" ] || (eval $(grep Le_Alt "/etc/ssl/letsencrypt/$main/$main.conf") && [ "$Le_Alt" != "$cert_alt" ]); then
+    echo "[*] Holen des Zertifikates..."
+    acme_add "${domains_cert[@]}"
+  else
+    echo "[*] Erneuern des Zertifikates..."
+    cron
+  fi
 
-  new_hostname="paedml-ssl.$domain"
+  new_hostname="paedml-ssl.${domains_cert[0]}"
   echo "[*] Ändern des Server-Hostnamens zu '$new_hostname'..."
   echo "$new_hostname" > /etc/hostname
   hostname "$new_hostname"
+  HOSTS=$(cat /etc/hosts | grep -v 127.0.0.1)
+  HOSTS="$HOSTS
+$(echo -e "127.0.0.1\t$new_hostname")"
+  echo "$HOSTS" > /etc/hosts
 
   echo "[*] Ändern der Webserver-Konfiguration..."
-  if [ ! -e /etc/nginx/sites/00-default.conf ]; then
-    regen_nginx_config
-    reload_nginx
-  fi
+  regen_nginx_config
+  reload_nginx
 }
 
 status() {
