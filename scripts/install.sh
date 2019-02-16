@@ -46,3 +46,5 @@ bash scripts/update.sh
 
 # override networkd with network-manager
 netplan apply
+systemctl disable systemd-networkd
+systemctl enable NetworkManager
