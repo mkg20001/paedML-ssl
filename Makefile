@@ -6,3 +6,9 @@ provision:
 enable-dev:
 	bash scripts/enable-dev.sh
 	bash scripts/update.sh
+destroy:
+	vagrant destroy -f
+re-provision: destroy provision
+update-box:
+	vagrant box update
+	make re-provision

@@ -21,3 +21,4 @@ lifecycle:
     curl https://get.acme.sh | bash -
     crontab -l | sed 's|/acme.sh|/acme.sh --config-home /etc/ssl/letsencrypt|' | crontab -
     rm -fv /etc/netplan/50-cloud-init.yaml
+    netplan apply
