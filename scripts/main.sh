@@ -2,10 +2,9 @@
 
 set -e
 
+# get bundle
 cd /tmp
-for f in git.tar.gz pw deploy.sh; do
-  wget "$HTTP_SERVER/$f"
-done
+tar xvfz bundle.tar.gz
 
 # setup local repo
 tar xvfz "git.tar.gz"
