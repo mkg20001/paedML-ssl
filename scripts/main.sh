@@ -5,6 +5,8 @@ set -e
 # get bundle
 cd /tmp
 tar xvfz bundle.tar.gz
+rm bundle.tar.gz
+cd provision
 
 # setup local repo
 tar xvfz "git.tar.gz"
