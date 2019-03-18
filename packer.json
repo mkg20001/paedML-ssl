@@ -67,7 +67,7 @@
         "cpus": "1",
         "disk_size": "2048",
         "headless": "true",
-        "hostname": "bionic64",
+        "hostname": "paedml-ssl",
         "http_proxy": "{{env `http_proxy`}}",
         "https_proxy": "{{env `https_proxy`}}",
         "iso_checksum": "a2cb36dc010d98ad9253ea5ad5a07fd6b409e3412c48f1860536970b073c98f5",
