@@ -1,21 +1,13 @@
-# dns addon
-.terraform
-*.tf
-# ssl addon
-http.header
-account.conf
 # nodeJS
 node_modules
 package-lock.json
-# vagrant
-*.log
-.vagrant
-credentials
-dist
-*.ova
+
 # build output
-generated_deployment.sh
 paedML-ssl.tar.xz
 packer_cache
-iso
+*.iso
+output-*
 *.tar.gz
+http/*
+!http/
+!http/preseed.cfg
