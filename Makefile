@@ -1,7 +1,7 @@
 build: prepare
 	packer build packer.json
 prepare:
-	tar cvfzp .git http/git.tar.gz
+	tar cvfzp http/git.tar.gz .git
 	rm -rf node_modules package-lock.json
 	npm i
 	OVERRIDE_LOCATION=/usr/lib/paedml-ssl npx dpl-tool ./deploy.yaml > http/deploy.sh
