@@ -1,5 +1,5 @@
 {
-    "_comment": "Build with `packer build packer.json`",
+    "_comment": "Build with `packer build packer.json`, from https://github.com/heizo/packer-ubuntu-18.04",
     "builders": [{
         "boot_command": [
             "{{user `boot_command_prefix`}}",
@@ -58,11 +58,7 @@
         "execute_command": "echo '{{user `ssh_password`}}'|{{.Vars}} sudo -E -S bash '{{.Path}}'",
         "expect_disconnect": true,
         "scripts": [
-            "script/update.sh",
-            "script/virtualbox.sh",
-            "script/motd.sh",
-            "script/minimize.sh",
-            "script/cleanup.sh"
+            "script/main.sh"
         ],
         "type": "shell"
     }],
