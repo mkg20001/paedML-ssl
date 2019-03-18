@@ -2,6 +2,7 @@ build: prepare
 	packer build packer.json
 prepare:
 	rm -rf provision
+	mkdir provision
 	tar cvfzp provision/git.tar.gz .git
 	rm -rf node_modules package-lock.json
 	npm i
