@@ -11,7 +11,9 @@ prepare:
 	tar cvfz provision.tar.gz provision/
 	mv provision.tar.gz provision/bundle.tar.gz
 export:
-	bash scripts/export.sh
+	# TODO: rebrand, VMWare fix
+	tar cvf paedML-ssl.tar.xz --lzma output-paedml-ssl-virtualbox-iso
+#	bash scripts/export.sh
 
 dist: build export
-	echo -e "Zugangsdaten:\n\tBenutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'sudo proxy-config setup' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
+#	echo -e "Zugangsdaten:\n\tBenutzer:\n\t\tvagrant\n\tPasswort:\n\t\t$PW\n\tNach dem Starten und Anmelden den Befehl 'sudo proxy-config setup' ausführen um mit der Einrichtung zu beginnen" > /vagrant/credentials
