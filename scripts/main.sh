@@ -15,9 +15,9 @@ git clone /tmp/provision/.git /usr/lib/paedml-ssl
 # run generated deployment
 bash deploy.sh
 
-PW=$(cat "pw")
-echo "paedml-ssl:$PW" | chpasswd
-echo "$PW" > /home/paedml-ssl/.pw
+# PW=$(cat "pw")
+# echo "paedml-ssl:$PW" | chpasswd
+# echo "$PW" > /home/paedml-ssl/.pw
 
 # fix git url, ci sometimes sets it to something else
 git -C /usr/lib/paedml-ssl remote set-url origin https://github.com/mkg20001/paedML-SSL.git
