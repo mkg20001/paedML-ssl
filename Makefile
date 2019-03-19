@@ -11,7 +11,8 @@ prepare:
 	tar cvfz provision.tar.gz provision/
 	mv provision.tar.gz provision/bundle.tar.gz
 export:
-	# TODO: rebrand, VMWare fix
+	# TODO: rebrand
+	bash scripts/post-process.sh
 	tar cvf paedML-ssl.tar.xz --lzma output-paedml-ssl-virtualbox-iso
 #	bash scripts/export.sh
 

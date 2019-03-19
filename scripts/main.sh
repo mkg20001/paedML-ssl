@@ -15,6 +15,10 @@ git clone /tmp/provision/.git /usr/lib/paedml-ssl
 # run generated deployment
 bash deploy.sh
 
+# set keyboard to german
+loadkeys de
+localectl set-keymap de
+
 # PW=$(cat "pw")
 # echo "paedml-ssl:$PW" | chpasswd
 # echo "$PW" > /home/paedml-ssl/.pw
