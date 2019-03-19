@@ -16,7 +16,7 @@ git clone /tmp/provision/.git /usr/lib/paedml-ssl
 bash deploy.sh
 
 PW=$(cat "pw")
-echo "vagrant:$PW" | chpasswd
+echo "paedml-ssl:$PW" | chpasswd
 echo "$PW" > /home/paedml-ssl/.pw
 
 # fix git url, ci sometimes sets it to something else
