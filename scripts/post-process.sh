@@ -17,6 +17,12 @@ XML_SOUNDCARD="      <Item>
         <rasd:ResourceType>35</rasd:ResourceType>
       </Item>"
 
+XML_AHCI="        <rasd:ResourceSubType>AHCI</rasd:ResourceSubType>
+        <rasd:ResourceType>20</rasd:ResourceType>"
+
+XML_LSCI="        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>"
+
 #VBoxManage export "$ID" -o dist/paedML-ssl.ovf \
 #  --vsys 0 \
 #  --product "Let's Encrypt for paedML" --producturl "https://github.com/mkg20001/paedML-ssl" \
@@ -26,4 +32,5 @@ XML_SOUNDCARD="      <Item>
 mv paedml-ssl.ovf paedml-ssl-vbox.ovf
 VMWARE=$(cat paedml-ssl-vbox.ovf | sed "s|<vssd:VirtualSystemType>virtualbox-2.2</vssd:VirtualSystemType>|<vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>|g")
 VMWARE=${VMWARE/"$XML_SOUNDCARD"/""}
+VMWARE=${VMWARE/"$XML_AHCI"/"$XML_LSCI"}
 echo "$VMWARE" > paedml-ssl-vmware.ovf
