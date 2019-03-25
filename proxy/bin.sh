@@ -131,17 +131,17 @@ ask_net() {
   if [ "$(_db $fam_id)" == "*" ]; then
     echo "[*] $fam_name@$_NIC wird auf DHCP geschaltet"
     CONF="$CONF
-      dhcp4: yes"
+      dhcp$1: yes"
   elif [ "$(_db $fam_id)" == "-" ]; then
     echo "[*] $fam_name@$_NIC wird nicht konfiguriert"
     CONF="$CONF
-      dhcp4: no"
+      dhcp$1: no"
   else
     prompt "$fam_id.gateway" "Gateway für $fam_name"
     prompt "$fam_id.dns" "DNS Server für $fam_name"
     CONF="$CONF
-      dhcp4: no
-      gateway4: $(_db $fam_id.gateway)"
+      dhcp$1: no
+      gateway$1: $(_db $fam_id.gateway)"
     _ADDR+=("$(_db $fam_id)")
     _DNS+=("$(_db $fam_id.dns)")
     echo "[*] $fam_name@$_NIC wird auf Addresse $(_db $fam_id) geschaltet"
@@ -151,13 +151,14 @@ ask_net() {
 ask_nic() {
   echo "[*] Netzwerkadapter:"
   ip -o link show | grep ": ens"
-  while true; do
+  NIC_NOT_SET=true
+  while $NIC_NOT_SET; do
     prompt nic "Netzwerkadapter der verwendet werden soll"
     _NIC=$(_db nic)
 
     for nic in $(ip -j link show | jq -cr ".[] | .ifname" | grep "^ens"); do
-      if [ "$nic" == "$_NIC" ]; then
-        break
+      if [[ "$nic" == "$_NIC" ]]; then
+        NIC_NOT_SET=false
       fi
     done
   done
