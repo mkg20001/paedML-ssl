@@ -25,6 +25,9 @@ localectl set-keymap de
 
 # fix git url, ci sometimes sets it to something else
 git -C /usr/lib/paedml-ssl remote set-url origin https://github.com/mkg20001/paedML-SSL.git
+# checkout to master, but without pulling yet
+git -C /usr/lib/paedml-ssl checkout -b master
+git -C /usr/lib/paedml-ssl branch master -u origin/master
 
 # run update routine
 cd /usr/lib/paedml-ssl
