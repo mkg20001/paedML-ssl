@@ -127,39 +127,90 @@ verify_reachability() {
 ask_net() {
   fam_name="IPv$1"
   fam_id="ipv$1"
-  prompt "$fam_id" "Adresse für $fam_name (* angeben um DHCP zu verwenden, - angeben um zu deaktivieren, format: 'ADDRESSE/MASKE')"
+  prompt "$fam_id" "Adresse für $fam_name@$_NIC (* angeben um DHCP zu verwenden, - angeben um zu deaktivieren, format: 'ADDRESSE/MASKE')"
   if [ "$(_db $fam_id)" == "*" ]; then
-    echo "[*] Aktivieren von DHCP für $fam_name..."
-    nmcli con mod "Wired connection 1" \
-      "$fam_id.addresses" "" \
-      "$fam_id.gateway" "" \
-      "$fam_id.dns" "" \
-      "$fam_id.dns-search" "" \
-      "$fam_id.method" "auto"
+    echo "[*] $fam_name@$_NIC wird auf DHCP geschaltet"
+    CONF="$CONF
+      dhcp4: yes"
   elif [ "$(_db $fam_id)" == "-" ]; then
-    echo "[*] Deaktivieren von $fam_name"
-    nmcli con mod "Wired connection 1" \
-      "$fam_id.addresses" "" \
-      "$fam_id.gateway" "" \
-      "$fam_id.dns" "" \
-      "$fam_id.dns-search" "" \
-      "$fam_id.method" "disable"
+    echo "[*] $fam_name@$_NIC wird nicht konfiguriert"
+    CONF="$CONF
+      dhcp4: no"
   else
     prompt "$fam_id.gateway" "Gateway für $fam_name"
-    prompt "$fam_id.dns" "DNS für $fam_name"
-    prompt "$fam_id.dns-search" "DNS Domain für $fam_name"
-    nmcli con mod "Wired connection 1" \
-      "$fam_id.addresses" "$(_db $fam_id)" \
-      "$fam_id.gateway" "$(_db $fam_id.gateway)" \
-      "$fam_id.dns" "$(_db $fam_id.dns)" \
-      "$fam_id.dns-search" "$(_db $fam_id.dns-search)" \
-      "$fam_id.method" "manual"
+    prompt "$fam_id.dns" "DNS Server für $fam_name"
+    CONF="$CONF
+      dhcp4: no
+      gateway4: $(_db $fam_id.gateway)"
+    _ADDR+=("$(_db $fam_id)")
+    _DNS+=("$(_db $fam_id.dns)")
+    echo "[*] $fam_name@$_NIC wird auf Addresse $(_db $fam_id) geschaltet"
   fi
 }
 
-setup() {
+ask_nic() {
+  echo "[*] Netzwerkadapter:"
+  ip -o link show | grep ": ens"
+  while true; do
+    prompt nic "Netzwerkadapter der verwendet werden soll"
+    _NIC=$(_db nic)
+
+    for nic in $(ip -j link show | jq -cr ".[] | .ifname" | grep "^ens"); do
+      if [ "$nic" == "$_NIC" ]; then
+        break
+      fi
+    done
+  done
+}
+
+setup_net() {
+  ask_nic
+
+  _ADDR=()
+  _DNS=()
+
+  CONF="network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    $_NIC:"
+
   ask_net 4
   ask_net 6
+
+  if [ ! -z "${_ADDR[*]}" ]; then
+    CONF="$CONF
+      adresses:"
+    for _ADDR in "${_ADDR[@]}"; do
+      CONF="$CONF
+        - $_ADDR"
+    done
+  fi
+
+  if [ ! -z "${_DNS[*]}" ]; then
+    CONF="$CONF
+      nameservers:
+        addresses:"
+    for _DNS in "${_DNS[@]}"; do
+      CONF="$CONF
+          - $_DNS"
+    done
+  fi
+
+  echo "$CONF" > /etc/netplan/10-pssl.yaml
+
+  echo "[*] Anwenden..."
+
+  netplan apply
+  service systemd-networkd restart
+
+  echo "[*] Angewendet!"
+
+  # TODO: connectivity check
+}
+
+setup() {
+  setup_net
 
   # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
