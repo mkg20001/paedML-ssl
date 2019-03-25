@@ -181,7 +181,7 @@ setup_net() {
 
   if [ ! -z "${_ADDR[*]}" ]; then
     CONF="$CONF
-      adresses:"
+      addresses:"
     for _ADDR in "${_ADDR[@]}"; do
       CONF="$CONF
         - $_ADDR"
