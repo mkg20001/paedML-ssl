@@ -13,7 +13,7 @@ prepare:
 export:
 	# TODO: rebrand
 	bash scripts/post-process.sh
-	tar cvf paedML-ssl.tar.xz --lzma output-paedml-ssl-virtualbox-iso
+	mv output-paedml-ssl-virtualbox-iso paedml-ssl
 #	bash scripts/export.sh
 
 dist: build export
