@@ -86,12 +86,27 @@ get_domains() {
 
   for s in $sub; do
     domains_cert+=("$s.$domain")
+  done
+
+  realmain="${domains_cert[0]}"
+  if [ "$(_db usemain)" == "n" ]; then
+    domains_cert=("${domains_cert[@]:1}")
+  fi
+  domains_alt=("${domains_cert[@]:1}")
+  main="${domains_cert[0]}"
+  domain="$main"
+
+  for d in ${domains_alt[*]}; do
     if [ -z "$cert_alt" ]; then
-      cert_alt="$s.$domain"
+      cert_alt="$d"
     else
-      cert_alt="$cert_alt,$s.$domain"
+      cert_alt="$cert_alt,$d"
     fi
   done
+
+  if [ -z "$cert_alt" ]; then
+    cert_alt="no"
+  fi
 }
 
 regen_nginx_config() {
@@ -216,7 +231,7 @@ setup() {
   # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
   prompt ip "paedML Ziel-Server IP-Addresse oder DNS (IPv6 Addressen umklammert angeben)"
-  prompt sub "Subdomains (mit leerzeichen getrennt angeben)" "mail vibe"
+  prompt sub "Subdomains (mit leerzeichen getrennt angeben)" "server mail vibe filr"
   prompt usemain "Maindomain verwenden (j=ja, n=nein)" j
 
   setup_web
@@ -228,13 +243,6 @@ setup_web() {
   # email=$(_db email)
   ip=$(_db ip)
   get_domains
-
-  realmain="${domains_cert[0]}"
-  if [ "$(_db usemain)" == "n" ]; then
-    domains_cert=("${domains_cert[@]:1}")
-  fi
-  main="${domains_cert[0]}"
-  domain="$main"
 
   if [ ! -e "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
     echo "[*] Seite wird in Wartungsmodus geschaltet..."
