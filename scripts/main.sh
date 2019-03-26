@@ -2,6 +2,11 @@
 
 set -ex
 
+# update
+apt-get update
+apt-get dist-upgrade -y
+apt-get clean
+
 # get bundle
 cd /tmp
 tar xvfz bundle.tar.gz
