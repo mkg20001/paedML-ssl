@@ -36,6 +36,14 @@
         "ssh_username": "{{user `ssh_username`}}",
         "ssh_wait_timeout": "10000s",
         "type": "virtualbox-iso",
+        "export_opts": [
+          "--vsys", "0",
+          "--product", "Let's Encrypt for paedML",
+          "--producturl", "https://github.com/mkg20001/paedML-SSL",
+          "--vendor", "Maciej Krüger (mkg20001)",
+          "--vendorurl", "https://mkg20001.io",
+          "--description", "paedML SSL"
+         ],
         "vboxmanage": [
             ["modifyvm", "{{.Name}}", "--audio", "none"],
             ["modifyvm", "{{.Name}}", "--usb", "off"],
