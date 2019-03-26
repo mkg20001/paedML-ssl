@@ -217,6 +217,7 @@ setup() {
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
   prompt ip "paedML Ziel-Server IP-Addresse oder DNS (IPv6 Addressen umklammert angeben)"
   prompt sub "Subdomains (mit leerzeichen getrennt angeben)" "mail vibe"
+  prompt usemain "Maindomain verwenden (j=ja, n=nein)" j
 
   setup_web
 
@@ -255,7 +256,12 @@ setup_web() {
     fi
   done
 
+  realmain="${domains_cert[0]}"
+  if [ "$(_db usemain)" == "n" ]; then
+    domains_cert=("${domains_cert[@]:1}")
+  fi
   main="${domains_cert[0]}"
+
   if [ ! -e "/etc/ssl/letsencrypt/$main/$main.conf" ] || (eval $(grep Le_Alt "/etc/ssl/letsencrypt/$main/$main.conf") && [ "$Le_Alt" != "$cert_alt" ]); then
     echo "[*] Holen des Zertifikates..."
     acme_add "${domains_cert[@]}"
@@ -264,7 +270,7 @@ setup_web() {
     cron
   fi
 
-  new_hostname="paedml-ssl.${domains_cert[0]}"
+  new_hostname="paedml-ssl.$realmain"
   echo "[*] Ändern des Server-Hostnamens zu '$new_hostname'..."
   echo "$new_hostname" > /etc/hostname
   hostname "$new_hostname"
