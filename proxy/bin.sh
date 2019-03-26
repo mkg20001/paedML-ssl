@@ -229,6 +229,13 @@ setup_web() {
   ip=$(_db ip)
   get_domains
 
+  realmain="${domains_cert[0]}"
+  if [ "$(_db usemain)" == "n" ]; then
+    domains_cert=("${domains_cert[@]:1}")
+  fi
+  main="${domains_cert[0]}"
+  domain="$main"
+
   if [ ! -e "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
     echo "[*] Seite wird in Wartungsmodus geschaltet..."
     rm -f /etc/nginx/sites/00-default.conf
@@ -255,12 +262,6 @@ setup_web() {
       read nothing
     fi
   done
-
-  realmain="${domains_cert[0]}"
-  if [ "$(_db usemain)" == "n" ]; then
-    domains_cert=("${domains_cert[@]:1}")
-  fi
-  main="${domains_cert[0]}"
 
   if [ ! -e "/etc/ssl/letsencrypt/$main/$main.conf" ] || (eval $(grep Le_Alt "/etc/ssl/letsencrypt/$main/$main.conf") && [ "$Le_Alt" != "$cert_alt" ]); then
     echo "[*] Holen des Zertifikates..."
