@@ -14,10 +14,8 @@ modules:
     nginx/html: /usr/share/nginx/html
     nginx/nginx.conf: /etc/nginx/nginx.conf
     proxy/bin.sh: /usr/bin/proxy-config
-    proxy/update-bin.sh: /usr/bin/proxy-update
-#    etc/01-nm.yaml: /etc/netplan/01-network-manager-all.yaml
+    shared/scripts/update-bin.sh: /usr/bin/proxy-update
 lifecycle:
   install.pre: |
     curl https://get.acme.sh | bash -
     crontab -l | sed 's|/acme.sh|/acme.sh --config-home /etc/ssl/letsencrypt|' | crontab -
-#    rm -fv /etc/netplan/50-cloud-init.yaml
