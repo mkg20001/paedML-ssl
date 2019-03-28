@@ -4,7 +4,7 @@ set -e
 
 # TODO: integrate into packer.json
 
-cd output-paedml-ssl-virtualbox-iso
+cd "$(dir -w 1 | grep ^vm-)"
 
 XML_SOUNDCARD="      <Item>
         <rasd:AddressOnParent>3</rasd:AddressOnParent>
