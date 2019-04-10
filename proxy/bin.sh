@@ -267,7 +267,12 @@ setup_web() {
 
     if $checkLoop; then
       echo "[!] Server nicht erreichbar! Bitte überprüfen Sie die Konfiguration und wiederholen Sie den Test durch das Drücken der Eingabetaste."
-      read nothing
+      echo "[!] (Falls Sie sich sicher sind das die Domain erreichbar ist und auf die Proxy verweist, tippen sie IGNORIEREN)"
+      read user
+      if [ "$user" == "IGNORIEREN" ]; then
+        checkLoop=false
+        echo "[*] Ignoriere..."
+      fi
     fi
   done
 
