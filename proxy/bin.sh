@@ -254,6 +254,12 @@ setup_web() {
   reload_nginx
 
   checkLoop=true
+
+  if [ ! -z "$IGNORE_REACHABILITY_CHECK" ]; then
+    echo "[*] Verbindungsüberprüfung ignoriert..."
+    checkLoop=false
+  fi
+
   while $checkLoop; do
     echo "[*] Überprüfen ob der Server erreichbar ist..."
     checkLoop=false
