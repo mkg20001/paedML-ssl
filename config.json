@@ -6,6 +6,7 @@
     "baseDeploy",
     "security",
     "node",
-    "console"
+    "console",
+    "nginxStream"
   ]
 }
