@@ -31,12 +31,13 @@ sandbox_eval_fnc() {
   if [ "$(type -t "$fnc")" == "function" ]; then
     (
       eval "$fnc"
-    ) # subshell to prevent shell suiciding when plugin fails, and to prevent plugins interferring with each other
+    ) # subshell to prevent shell suiciding when plugin fails and to prevent plugins interferring with each other
   fi
 }
 
 setup_plugins() {
   prompt mods "Zu verwendende Plugin-IDs angeben (verfügbar: ${mods[@]})"
+  # TODO: remove routine (hook: disable)
 }
 
 do_plugin_hooks() {
