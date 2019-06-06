@@ -42,7 +42,7 @@ setup_plugins() {
 
 do_plugin_hooks() {
   for mod in $(_db mods); do
-    sandbox_eval_fnc "${mod}_$2"
+    sandbox_eval_fnc "${mod}_$1"
   done
 }
 
@@ -105,7 +105,12 @@ get_domains() {
 }
 
 generate_file() {
-  envsubst <"$1" >"$2"
+  # envsubst <"$MAIN/proxy/$1" >"$2"
+  eval "cat '$MAIN/proxy/$1' $CHAIN" > "$2" # TODO: conf values can use ' to escape sandbox
+}
+
+expose_var() {
+  CHAIN="$CHAIN | sed 's|\$$1|$2|g'"
 }
 
 regen_nginx_config() {
@@ -113,15 +118,17 @@ regen_nginx_config() {
   ip=$(_db ip)
   get_domains
 
-  export DOMAIN="$domain"
-  export CERT="/etc/ssl/letsencrypt/$domain/fullchain.cer"
-  export KEY="/etc/ssl/letsencrypt/$domain/$domain.key"
-  export SERVER_IP="$ip"
+  expose_var DOMAIN "$domain"
+  expose_var CERT "/etc/ssl/letsencrypt/$domain/fullchain.cer"
+  expose_var KEY "/etc/ssl/letsencrypt/$domain/$domain.key"
+  expose_var SERVER_IP "$ip"
 
   generate_file "00-default.conf" "/etc/nginx/sites/00-default.conf"
 }
 
 regen_config() {
+  CHAIN=""
+
   regen_nginx_config
 
   do_plugin_hooks "configure"
@@ -169,7 +176,7 @@ setup() {
 }
 
 load_plugins() {
-  for f in "$MAIN/proxy/MODULES"*; do
+  for f in "$MAIN/proxy/modules/"*; do
     MODULE=$(basename "$f")
     . "$f/index.sh"
   done
@@ -184,7 +191,7 @@ setup_web() {
     echo "[*] Seite wird in Wartungsmodus geschaltet..."
     rm -f /etc/nginx/sites/00-default.conf
   else
-    regen_nginx_config
+    regen_config
   fi
 
   reload_nginx
@@ -236,7 +243,7 @@ $(echo -e "127.0.0.1\t$new_hostname")"
   echo "$HOSTS" > /etc/hosts
 
   echo "[*] Ändern der Webserver-Konfiguration..."
-  regen_nginx_config
+  regen_config
   reload_nginx
 }
 
@@ -261,6 +268,7 @@ cron() {
 main() {
   case "$1" in
     setup|status|cron|help)
+      load_plugins
       "$1"
       ;;
     *)
