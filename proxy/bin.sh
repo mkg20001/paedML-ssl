@@ -2,27 +2,47 @@
 
 set -e
 
-DB="/var/lib/proxy-config"
+shopt -s nullglob
+
 MAIN=$(dirname $(dirname $(readlink -f $0)))
+SHARED="$MAIN/shared"
 
-if [ $(id -u) -gt 0 ]; then
-  echo "FEHLER: Dieser Befehl muss als Benutzer root ausgeführt werden. Verwenden Sie bitte stattdessen 'sudo $0 $*'" >&2
-  exit 2
-fi
+. "$SHARED/modules/basic.sh"
+_module _root
+_module db
+_module ui
+_module net
 
-if [ ! -e "$DB" ]; then
-  touch "$DB"
-fi
+init_db "/var/lib/proxy-config"
 
-_db() { # GET <key> SET <key> <value>
-  if [ -z "$2" ]; then
-    cat "$DB" | grep "^$1=" | sed "s|$1=||g" || /bin/true
-  else
-    newdb=$(cat "$DB" | grep -v "^$1=" || /bin/true)
-    newdb="$newdb
-$1=$2"
-    echo "$newdb" > "$DB"
+mods=()
+
+init_module() {
+  MOD_ID="$1"
+  MOD_NAME="$2"
+
+  mods+=("$MOD_ID")
+  # module will inizialize it's own hooks using "${MOD_ID}_${HOOK_NAME}", will be called using eval
+}
+
+sandbox_eval_fnc() {
+  local fnc="$1"
+
+  if [ "$(type -t "$fnc")" == "function" ]; then
+    (
+      eval "$fnc"
+    ) # subshell to prevent shell suiciding when plugin fails, and to prevent plugins interferring with each other
   fi
+}
+
+setup_plugins() {
+  prompt mods "Zu verwendende Plugin-IDs angeben (verfügbar: ${mods[@]})"
+}
+
+do_plugin_hooks() {
+  for mod in $(_db mods); do
+    sandbox_eval_fnc "${mod}_$2"
+  done
 }
 
 acme() {
@@ -44,38 +64,12 @@ help() {
   echo
   echo "Befehle:"
   echo " setup: Initielle Konfiguration durchführen (kann auch erneut ausgeführt werden um die Werte zu ändern)"
-  echo " status: Nginx status"
+  echo " status: nginx status"
   echo " cron: Cronjob manuell ausführen"
-  echo " logs: Nginx Logdateien"
+  echo " logs: nginx Logdateien"
   echo " help: Diese Hilfe"
   echo
   exit 2
-}
-
-prompt() {
-  KEY="$1"
-  PROMPT="$2"
-  CUR=$(_db "$KEY")
-  NEW=""
-
-  if [ -z "$CUR" ] && [ ! -z "$3" ]; then
-    CUR="$3" # use $3 as default
-  fi
-
-  while [ -z "$NEW" ]; do
-    if [ ! -z "$CUR" ]; then
-      read -p "> $PROMPT (aktueller wert '$CUR', leer lassen um beizubehalten): " NEW
-      if [ -z "$NEW" ]; then
-        NEW="$CUR"
-      fi
-    else
-      read -p "$PROMPT: " NEW
-    fi
-  done
-
-  echo "< $NEW"
-
-  _db "$KEY" "$NEW"
 }
 
 get_domains() {
@@ -109,10 +103,27 @@ get_domains() {
   fi
 }
 
+generate_file() {
+  envsubst <"$1" >"$2"
+}
+
 regen_nginx_config() {
   echo "[*] Anwenden der Änderungen..."
-  domain="${domains_cert[0]}"
-  cat "$MAIN/proxy/00-default.conf" | sed "s|DOMAIN|$domain|g" | sed "s|SERVER_IP|$ip|g" > /etc/nginx/sites/00-default.conf
+  ip=$(_db ip)
+  get_domains
+
+  export DOMAIN="$domain"
+  export CERT="/etc/ssl/letsencrypt/$domain/fullchain.cer"
+  export KEY="/etc/ssl/letsencrypt/$domain/$domain.key"
+  export SERVER_IP="$ip"
+
+  generate_file "00-default.conf" "/etc/nginx/sites/00-default.conf"
+}
+
+regen_config() {
+  regen_nginx_config
+
+  do_plugin_hooks "configure"
 }
 
 reload_nginx() {
@@ -139,104 +150,28 @@ verify_reachability() {
   fi
 }
 
-ask_net() {
-  fam_name="IPv$1"
-  fam_id="ipv$1"
-  prompt "$fam_id" "Adresse für $fam_name@$_NIC (* angeben um DHCP zu verwenden, - angeben um zu deaktivieren, format: 'ADDRESSE/MASKE')"
-  if [ "$(_db $fam_id)" == "*" ]; then
-    echo "[*] $fam_name@$_NIC wird auf DHCP geschaltet"
-    CONF="$CONF
-      dhcp$1: yes"
-  elif [ "$(_db $fam_id)" == "-" ]; then
-    echo "[*] $fam_name@$_NIC wird nicht konfiguriert"
-    CONF="$CONF
-      dhcp$1: no"
-  else
-    prompt "$fam_id.gateway" "Gateway für $fam_name"
-    prompt "$fam_id.dns" "DNS Server für $fam_name"
-    CONF="$CONF
-      dhcp$1: no
-      gateway$1: $(_db $fam_id.gateway)"
-    _ADDR+=("$(_db $fam_id)")
-    _DNS+=("$(_db $fam_id.dns)")
-    echo "[*] $fam_name@$_NIC wird auf Addresse $(_db $fam_id) geschaltet"
-  fi
-}
-
-ask_nic() {
-  echo "[*] Netzwerkadapter:"
-  ip -o link show | grep ": ens"
-  NIC_NOT_SET=true
-  while $NIC_NOT_SET; do
-    prompt nic "Netzwerkadapter der verwendet werden soll"
-    _NIC=$(_db nic)
-
-    for nic in $(ip -j link show | jq -cr ".[] | .ifname" | grep "^ens"); do
-      if [[ "$nic" == "$_NIC" ]]; then
-        NIC_NOT_SET=false
-      fi
-    done
-  done
-}
-
-setup_net() {
-  ask_nic
-
-  _ADDR=()
-  _DNS=()
-
-  CONF="network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    $_NIC:"
-
-  ask_net 4
-  ask_net 6
-
-  if [ ! -z "${_ADDR[*]}" ]; then
-    CONF="$CONF
-      addresses:"
-    for _ADDR in "${_ADDR[@]}"; do
-      CONF="$CONF
-        - $_ADDR"
-    done
-  fi
-
-  if [ ! -z "${_DNS[*]}" ]; then
-    CONF="$CONF
-      nameservers:
-        addresses:"
-    for _DNS in "${_DNS[@]}"; do
-      CONF="$CONF
-          - $_DNS"
-    done
-  fi
-
-  echo "$CONF" > /etc/netplan/10-pssl.yaml
-
-  echo "[*] Anwenden..."
-
-  netplan apply
-  service systemd-networkd restart
-
-  echo "[*] Angewendet!"
-
-  # TODO: connectivity check
-}
-
 setup() {
   setup_net
 
   # prompt email "E-Mail für Zertifikatsablaufbenarichtigungen"
   prompt domain "Haupt Domain-Name (z.B. ihre-schule.de)"
-  prompt ip "paedML Ziel-Server IP-Addresse oder DNS (IPv6 Addressen umklammert angeben)"
+  prompt ip "paedML Ziel-Server IP-Addresse oder DNS (IPv6 Addressen [umklammert] angeben)"
   prompt sub "Subdomains (mit leerzeichen getrennt angeben)" "server mail vibe filr"
   prompt usemain "Maindomain verwenden (j=ja, n=nein)" j
+  
+  setup_plugins
+  do_plugin_hooks setup
 
   setup_web
 
   echo "[!] Fertig"
+}
+
+load_plugins() {
+  for f in "$MAIN/proxy/MODULES"*; do
+    MODULE=$(basename "$f")
+    . "$f/index.sh"
+  done
 }
 
 setup_web() {
@@ -306,7 +241,7 @@ $(echo -e "127.0.0.1\t$new_hostname")"
 
 status() {
   echo
-  echo "[+] NGinx Status und Logeinträge:"
+  echo "[+] nginx Status und Logeinträge:"
   echo
   systemctl status nginx -n10 --no-pager --full
   echo
