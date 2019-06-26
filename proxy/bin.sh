@@ -226,7 +226,7 @@ setup_web() {
     fi
   done
 
-  if [ ! -e "/etc/ssl/letsencrypt/$main/$main.conf" ] || [ ! -e "/etc/ssl/letsencrypt/$main/$main.cert" ] || (eval $(grep Le_Alt "/etc/ssl/letsencrypt/$main/$main.conf") && [ "$Le_Alt" != "$cert_alt" ]); then
+  if [ ! -e "/etc/ssl/letsencrypt/$main/$main.conf" ] || [ ! -e "/etc/ssl/letsencrypt/$main/fullchain.cer" ] || (eval $(grep Le_Alt "/etc/ssl/letsencrypt/$main/$main.conf") && [ "$Le_Alt" != "$cert_alt" ]); then
     echo "[*] Holen des Zertifikates..."
     acme_add "${domains_cert[@]}"
   else
