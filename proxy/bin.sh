@@ -7,6 +7,10 @@ shopt -s nullglob
 MAIN=$(dirname $(dirname $(readlink -f $0)))
 SHARED="$MAIN/shared"
 
+if [ -e /etc/default/proxy ]; then
+  . /etc/default/proxy
+fi
+
 . "$SHARED/modules/basic.sh"
 _module _root
 _module db
