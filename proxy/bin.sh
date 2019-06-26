@@ -189,7 +189,7 @@ setup_web() {
 
   if [ ! -e "/etc/ssl/letsencrypt/$domain/fullchain.cer" ]; then
     echo "[*] Seite wird in Wartungsmodus geschaltet..."
-    do_plugin_hooks remove
+    do_plugin_hooks disable
     rm -f /etc/nginx/sites/00-default.conf
   else
     regen_config
