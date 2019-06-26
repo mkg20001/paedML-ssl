@@ -271,6 +271,9 @@ main() {
       load_plugins
       "$1"
       ;;
+    acme|acme_add)
+      "$1" "$@"
+      ;;
     *)
       help
       ;;
