@@ -19,6 +19,6 @@ ldaps_setup() {
 }
 
 ldaps_disable() {
-  ufw remove allow 636/tcp
+  ufw delete allow 636/tcp
   rm -f /etc/nginx/stream.d/ldaps.conf
 }

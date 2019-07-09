@@ -15,6 +15,6 @@ gw_setup() {
 }
 
 gw_disable() {
-  ufw remove allow 8300/tcp
+  ufw delete allow 8300/tcp
   rm -f /etc/nginx/stream.d/groupwise.conf
 }

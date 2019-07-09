@@ -4,6 +4,7 @@ set -e
 
 shopt -s nullglob
 
+CMD="$0"
 MAIN=$(dirname $(dirname $(readlink -f $0)))
 SHARED="$MAIN/shared"
 
