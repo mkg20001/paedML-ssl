@@ -41,7 +41,7 @@ sandbox_eval_fnc() {
 }
 
 setup_plugins() {
-  prompt mods "Zu verwendende Plugin-IDs angeben (verfügbar: ${mods[@]})"
+  prompt mods "Zu verwendende Plugin-IDs angeben (verfügbar: ${mods[*]})"
   # TODO: remove routine (hook: disable)
 }
 
@@ -52,7 +52,7 @@ do_plugin_hooks() {
 }
 
 acme() {
-  /root/.acme.sh/acme.sh --config-home /etc/ssl/letsencrypt "$@"
+  env SUDO_COMMAND= SUDO_USER= SUDO_UID= SUDO_GID= /root/.acme.sh/acme.sh --config-home /etc/ssl/letsencrypt "$@"
 }
 
 acme_add() {
