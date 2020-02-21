@@ -278,7 +278,9 @@ main() {
       "$1"
       ;;
     acme|acme_add)
-      "$1" "$@"
+      cmd="$1"
+      shift
+      "$cmd" "$@"
       ;;
     *)
       help
