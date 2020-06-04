@@ -3,6 +3,7 @@ affects:
 modules:
   pkg:
     - nginx
+    - nginx-extras
     - network-manager
   ufw:
     - allow 'nginx full' comment Web
